@@ -6,9 +6,88 @@ background: /img/posts/05.jpg
 subtitle: Problems look mighty small from 150 miles up
 title: Maths 1A and 1B Question Bank
 ---
+
+<style>
+  :root {
+  --d: "M 0 0 h 300";
+  --animation: 4s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite forwards;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+  
+  svg {
+  margin: auto;
+  width: 300px;
+  height: auto;
+  display: block;
+}
+
+/* animate the circle to follow the path described by the custom property */
+svg circle {
+  offset-path: path(var(--d));
+  offset-distance: 0%;
+  animation: var(--animation);
+  animation-name: increaseOffset;
+}
+
+svg path {
+  stroke-dashoffset: 1;
+  stroke-dasharray: 1;
+  animation: var(--animation);
+  animation-name: removeOffset;
+}
+
+@keyframes increaseOffset {
+  to {
+    offset-distance: 100%;
+  }
+}
+
+@keyframes removeOffset {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+</style>
+
 <h2 class="section-heading">Maths Question Bank</h2>
 
 <p>In this post you will get 11th class Maths 1A and 1B chapter wise important questions and marks weightage for both 1A and 1B.<p>
+  
+  <!-- include the canvas next to the controlling form -->
+<div>
+  <canvas width="280" height="200"></canvas>
+  <form>
+    <!-- add an SVG to replace the visual of the input of type checkbox
+      be sure to add a way to know when the input is being focused on
+      -->
+    <label>
+      <input type="checkbox" id="onOff" name="onOff" />
+      <svg viewBox="-50 -50 100 100" width="25" height="25">
+        <defs>
+          <pattern id="dots" viewBox="-10 -10 20 20" width="0.1" height="0.1">
+            <circle r="3" id="circle" />
+            <use href="#circle" x="10" y="10" />
+            <use href="#circle" x="10" y="-10" />
+            <use href="#circle" x="-10" y="10" />
+            <use href="#circle" x="-10" y="-10" />
+          </pattern>
+        </defs>
+        <g stroke="none">
+          <circle class="outline" opacity="0" r="50" fill="hsl(0, 0%, 100%)" />
+          <circle r="45" fill="currentColor" />
+          <circle r="45" fill="url(#dots)" />
+        </g>
+      </svg>
+    </label>
+    <!-- output highlighting the status of the checkbox -->
+    <output name="status" for="onOff">Off</output>
+  </form>
+</div>
  
 <p>Make sure you make the full use of this work sheet and practice all the questions and it will surely help.
 
@@ -17,3 +96,65 @@ title: Maths 1A and 1B Question Bank
 <a href="https://drive.google.com/open?id=12kjVWAddAXcWUhEFHhADvOUppgmQiJ_8"><button type="button" class="btn btn-secondary">Download</button></a>
     
     <p>Maths is one amongst those subjects that you’ll simply pay hours finding out, however, find yourself none the wiser.</p>
+
+<script>
+  const form = document.querySelector('form');
+const canvas = document.querySelector('canvas');
+const context = canvas.getContext('2d');
+context.fillStyle = '#777777';
+
+// variable to keep track of requestAnimationFrame
+// most importantly to cancel the animation
+let animationFrame;
+
+// setup: create a grid to replicate the pixels of the static texture
+const { width, height } = canvas;
+const columns = 150;
+const rows = 100;
+// w and h describing the size of the pixels
+const w = width / columns;
+const h = height / rows;
+
+const grid = Array(columns * rows)
+  .fill('')
+  .map((val, index) => ({
+    row: Math.floor(index / columns),
+    column: index % columns,
+  }));
+
+// turn on: fill in the rectangles making up the grid at random
+function turnOn() {
+  context.clearRect(0, 0, width, height);
+
+  grid.forEach(({ row, column }) => {
+    if (Math.random() > 0.5) {
+      context.fillRect(column * w, row * h, w, h);
+    }
+  });
+  context.fill();
+
+  animationFrame = requestAnimationFrame(turnOn);
+}
+
+// turn off: remove existing drawing
+function turnOff() {
+  context.clearRect(0, 0, width, height);
+
+  cancelAnimationFrame(animationFrame);
+}
+
+// update the output using the form element api
+// https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements
+function handleInput() {
+  const { checked: isOn } = this.onOff;
+  this.status.value = isOn ? 'On' : 'Off';
+
+  // change the appearance of the canvas
+  if (isOn) {
+    turnOn();
+  } else {
+    turnOff();
+  }
+}
+form.addEventListener('input', handleInput);
+</script>
